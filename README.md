@@ -29,4 +29,20 @@ Released under dual license, Affero GPL and Comercial License.
       var crawler = new NetCrawler(content);
       var quickTimeProduct = crawler.Crawl<TestAppStoreProduct>();
       
-      
+
+Features:
+- Parse data directly into model based on class and property attributes
+- Class attribute to filter content down to a section before extracting content into class properties
+- Ability to stack crawlers, so a property can be extracted by doing an XPath operation followed by a Regex
+- XPath crawler that works with XHTML (with Agility Pack) and XML
+- Regex crawler
+- Default Value if content is not matched or optionally throw exception
+
+TODO:
+- parse list
+- custom type crawler
+- StripHtml crawler
+- Regex.Replace crawler
+- Follow nested modeles (members of the "root" model) to further exract data
+
+
