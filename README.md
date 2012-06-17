@@ -45,4 +45,4 @@ TODO:
 - Regex.Replace crawler
 - Follow nested modeles (members of the "root" model) to further exract data
 - handle filling types other than strings in the model
-
+- add logging
