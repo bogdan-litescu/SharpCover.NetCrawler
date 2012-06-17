@@ -1,0 +1,1 @@
+git log --pretty="%%ai %%s" > changelog.txt
