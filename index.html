@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="SharpCover.NetCrawler : " />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>SharpCover.NetCrawler</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/bogdan-litescu/SharpCover.NetCrawler">View on GitHub</a>
+
+          <h1 id="project_title">SharpCover.NetCrawler</h1>
+          <h2 id="project_tagline"></h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/bogdan-litescu/SharpCover.NetCrawler/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/bogdan-litescu/SharpCover.NetCrawler/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>SharpCover.NetCrawler</h1>
+
+<p>Currently under development!</p>
+
+<p>Released under dual license, Affero GPL and Comercial License. Contact us for pricing, customizations, support.</p>
+
+<p><strong>Usage example:</strong></p>
+
+<p>The model:</p>
+
+<pre><code>[CrawlWithXPath("//*[@id='productInfo']")]
+class TestAppStoreProduct
+{
+    [CrawlWithXPath("./div[@class='title']/h1/text()")]
+    public string Title { get; set; }
+
+    [CrawlWithXPath("./div[@class='description']/text()")]
+    public string Description { get; set; }
+
+    [CrawlWithRegex("class\\s*=\\s*['\"]gallery['\"].+?src\\s*=\\s*['\"]([^\"]+)", MatchGroup=1)]
+    public string IconUrl { get; set; }
+}
+</code></pre>
+
+<p>Loading XHTML document and parsing data into the model:</p>
+
+<pre><code>  var content = new XHtmlContent();
+  content.LoadFromFile("product-info.html");
+
+  var crawler = new NetCrawler(content);
+  var quickTimeProduct = crawler.Crawl&lt;TestAppStoreProduct&gt;();
+</code></pre>
+
+<p>Features:</p>
+
+<ul>
+<li>Parse data directly into model based on class and property attributes</li>
+<li>Class attribute to filter content down to a section before extracting content into class properties</li>
+<li>Ability to stack crawlers, so a property can be extracted by doing an XPath operation followed by a Regex</li>
+<li>XPath crawler that works with XHTML (with Agility Pack) and XML</li>
+<li>Regex crawler</li>
+<li>Default Value if content is not matched or optionally throw exception</li>
+<li>Parse List of objects (for example a products list)</li>
+</ul><p>TODO:</p>
+
+<ul>
+<li>custom type crawler</li>
+<li>StripHtml crawler</li>
+<li>Regex.Replace crawler</li>
+<li>Follow nested modeles (members of the "root" model) to further exract data</li>
+<li>handle filling types other than strings in the model</li>
+<li>add logging</li>
+</ul>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">SharpCover.NetCrawler maintained by <a href="https://github.com/bogdan-litescu">bogdan-litescu</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-32725413-2");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+
+  </body>
+</html>
