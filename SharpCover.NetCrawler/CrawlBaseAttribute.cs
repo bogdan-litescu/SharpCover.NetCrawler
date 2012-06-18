@@ -46,6 +46,12 @@ namespace SharpCover.NetCrawler
         /// </summary>
         public bool ThrowIfNotFound { get; set; }
 
+        /// <summary>
+        /// When multiple crawler attributes are stacked, use this to determine the order in which they execute
+        /// since the order given by the .Net framework reflection is not reliable for determining order.
+        /// </summary>
+        public int Index { get; set; }
+
         protected IContentSource GetDefault(string errMessage=null)
         {
             if (DefaultValue != null) {

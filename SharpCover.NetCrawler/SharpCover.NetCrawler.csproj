@@ -57,6 +57,7 @@
     <Compile Include="NetCrawler.cs" />
     <Compile Include="ICrawler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils\ConvertUtils.cs" />
     <Compile Include="Utils\ExceptionUtils.cs" />
     <Compile Include="Utils\UrlDownloader.cs" />
   </ItemGroup>

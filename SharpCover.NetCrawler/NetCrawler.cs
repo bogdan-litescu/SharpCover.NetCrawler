@@ -31,6 +31,7 @@ using System.Text;
 using System.IO;
 using HtmlAgilityPack;
 using SharpCover.NetCrawler.Content;
+using SharpCover.NetCrawler.Utils;
 
 namespace SharpCover.NetCrawler
 {
@@ -67,12 +68,8 @@ namespace SharpCover.NetCrawler
 
             // select base content by applying crawlers one after another
             var content = Content;
-            var attrs = type.GetCustomAttributes(true);
-            for (int i = 0; i < attrs.Length; i++) {
-                var crawlSection = attrs[i] as CrawlBaseAttribute;
-                if (null != crawlSection)
-                    content = crawlSection.Crawl(content, asList);
-            }
+            foreach (var crawlSection in GetCrawlAttributes(type.GetCustomAttributes(true)))
+                 content = crawlSection.Crawl(content, asList);
 
             // we now know how many objects we need
             List<T> objs = new List<T>();
@@ -81,25 +78,36 @@ namespace SharpCover.NetCrawler
 
             // ready to crawl properties
             foreach (var prop in type.GetProperties()) {
-                var valueContent = content;
-                bool atLeastOne = false;
-                var propAttrs = prop.GetCustomAttributes(true);
-                for (int i = 0; i < propAttrs.Length; i++) {
-                    var crawlField = propAttrs[i] as CrawlBaseAttribute;
-                    if (null != crawlField) {
-                        atLeastOne = true;
-                        valueContent = crawlField.Crawl(valueContent, asList);
-                    }
-                }
 
-                if (atLeastOne) {
+                var valueContent = content;
+                var propertyAttrs = GetCrawlAttributes(prop.GetCustomAttributes(true));
+                if (propertyAttrs.Count > 0) {
+
+                    foreach (var crawlField in propertyAttrs)
+                        valueContent = crawlField.Crawl(valueContent, asList);
+
                     var values = valueContent.ToStringList();
-                    for (int i = 0; i < values.Count; i++)
-                        prop.SetValue(objs[i], values[i], null);
+                    for (int i = 0; i < values.Count; i++) {
+                        prop.SetValue(objs[i], values[i].Cast(prop.PropertyType), null);
+                        //prop.SetValue(objs[i], Convert.ChangeType(values[i], prop.PropertyType), null);
+                    }
                 }
             }
 
             return objs;
+        }
+
+        IList<CrawlBaseAttribute> GetCrawlAttributes(object[] allAttributes)
+        {
+            List<CrawlBaseAttribute> attrs = new List<CrawlBaseAttribute>();
+            foreach (var a in allAttributes) {
+                var crawlField = a as CrawlBaseAttribute;
+                if (null != crawlField) {
+                    attrs.Add(crawlField);
+                }
+            }
+
+            return attrs.OrderBy(x => x.Index).ToList();
         }
     }
 }

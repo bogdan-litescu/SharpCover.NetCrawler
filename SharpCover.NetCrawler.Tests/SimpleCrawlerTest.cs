@@ -121,9 +121,8 @@ namespace SharpCover.NetCrawler.Tests
             Assert.IsTrue(quickTimeProduct.IconUrl.IndexOf("http://store.storeimages.cdn-apple.com/6270") == 0);
         }
 
-
-        [CrawlWithXPath("ul/li")]
-        [CrawlWithXPath("//*[@id='product-page-0']")]
+        [CrawlWithXPath("//*[@id='product-page-0']", Index = 10)]
+        [CrawlWithXPath("ul/li", Index = 20)]
         class TestAppStoreProductSummary
         {
             [CrawlWithXPath("./dl/dt[@class='name']/a/text()")]
@@ -152,6 +151,62 @@ namespace SharpCover.NetCrawler.Tests
             Assert.AreEqual(15, productList.Count);
             //Assert.IsTrue(!string.IsNullOrEmpty(quickTimeProduct.Description));
             //Assert.IsTrue(quickTimeProduct.IconUrl.IndexOf("http://store.storeimages.cdn-apple.com/6270") == 0);
+        }
+
+        enum eTestDateTypesModelEnum
+        {
+            EnumValue1,
+            EnumValue2
+        }
+
+        class TestDateTypesModel
+        {
+            [CrawlWithXPath("//body/p[@class='int']/text()")]
+            public int IntData { get; set; }
+
+            [CrawlWithXPath("//body/p[@class='bool1']/text()")]
+            public bool Bool1Data { get; set; }
+
+            [CrawlWithXPath("//body/p[@class='bool2']/text()")]
+            public bool Bool2Data { get; set; }
+
+            [CrawlWithXPath("//body/p[@class='real']/text()")]
+            public double DoubleData { get; set; }
+
+            [CrawlWithXPath("//body/p[@class='real']/text()")]
+            public double FloatData { get; set; }
+
+            [CrawlWithXPath("//body/p[@class='real']/text()")]
+            public double DecimalData { get; set; }
+
+            [CrawlWithXPath("//body/p[@class='enum']/text()")]
+            public eTestDateTypesModelEnum EnumData { get; set; }
+
+            [CrawlWithXPath("//body/p[@class='date']/text()")]
+            public DateTime DateTimeData { get; set; }
+        }
+
+        /// <summary>
+        /// Load a list of products from a listing
+        ///</summary>
+        [TestMethod()]
+        [DeploymentItem("SharpCover.NetCrawler.Tests/TestData/data-types.html")]
+        public void TestCrawlDataTypes()
+        {
+            var content = new XHtmlContent();
+            content.LoadFromFile("data-types.html");
+
+            var crawler = new NetCrawler(content);
+            var dateTypes = crawler.Crawl<TestDateTypesModel>();
+
+            Assert.AreEqual(123, dateTypes.IntData);
+            Assert.AreEqual(true, dateTypes.Bool1Data);
+            Assert.AreEqual(true, dateTypes.Bool2Data);
+            Assert.AreEqual(123.123, dateTypes.FloatData);
+            Assert.AreEqual(123.123, dateTypes.DecimalData);
+            Assert.AreEqual(123.123, dateTypes.DoubleData);
+            Assert.AreEqual(eTestDateTypesModelEnum.EnumValue2, dateTypes.EnumData);
+            Assert.AreEqual(new DateTime(2012, 06, 02), dateTypes.DateTimeData.Date);
         }
     }
 
