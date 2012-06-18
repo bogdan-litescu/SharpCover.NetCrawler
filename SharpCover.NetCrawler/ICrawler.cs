@@ -33,6 +33,7 @@ namespace SharpCover.NetCrawler
 {
     public interface ICrawler
     {
-
+        T Crawl<T>() where T : class;
+        IList<T> CrawlList<T>() where T : class;
     }
 }

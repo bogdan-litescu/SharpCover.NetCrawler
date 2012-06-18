@@ -33,13 +33,18 @@ using System.Text.RegularExpressions;
 
 namespace SharpCover.NetCrawler
 {
+    /// <summary>
+    /// This will instruct NetCrawler to extract relevant content using regular expressions.
+    /// When a class is decorated with this attribute, then NetCrawler will use it to extract the section
+    /// so proprties are matched against the section instead of the whole section. This would improve perforamcens
+    /// but also limit errors that would result from same pattern matching in other sections.
+    /// This attribute can be stacked with other crawler attributes (of different types) to filter content in stages.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = true, Inherited = true)]
     public class CrawlWithRegexAttribute : CrawlBaseAttribute
     {
         public string Pattern { get; set; }
         public int MatchGroup { get; set; }
-        public bool ThrowIfNotFound { get; set; }
-        public string DefaultValue { get; set; }
 
         public CrawlWithRegexAttribute(string pattern)
         {
@@ -48,19 +53,35 @@ namespace SharpCover.NetCrawler
             ThrowIfNotFound = true;
         }
 
-        public override IContentSource Crawl(IContentSource content)
+        internal override IContentSource Crawl(IContentSource content, bool asList)
+        {
+            if (content == null)
+                return GetDefault(string.Format("Null content"));
+
+            return asList ? CrawlList(content) : CrawlObject(content);
+        }
+
+        IContentSource CrawlObject(IContentSource content)
         {
             var match = Regex.Match(content.ToString(), Pattern, RegexOptions.Singleline | RegexOptions.IgnoreCase);
-            if (match == null || match.Groups.Count <= MatchGroup) {
-                // TODO: watch out for int=0
-                if (DefaultValue != null)
-                    return new PlainContent() { Content = DefaultValue };
+            if (match == null || match.Groups.Count <= MatchGroup)
+                return GetDefault(string.Format("Could not match pattern {0}", Pattern));
 
-                if (ThrowIfNotFound)
-                    throw new ArgumentOutOfRangeException(string.Format("Could not match pattern {0}", Pattern));
-            }
+            var plainContent = new PlainContent();
+            plainContent.ContentList.Add(match.Groups[MatchGroup].Value);
+            return plainContent;
+        }
 
-            return new PlainContent() { Content = match.Groups[MatchGroup].Value };
+        IContentSource CrawlList(IContentSource content)
+        {
+            var matches = Regex.Matches(content.ToString(), Pattern, RegexOptions.Singleline | RegexOptions.IgnoreCase);
+            if (matches == null || matches.Count == 0 || matches[0].Groups.Count <= MatchGroup)
+                return GetDefault(string.Format("Could not match pattern {0}", Pattern));
+
+            var plainContent = new PlainContent();
+            foreach (Match match in matches)
+                plainContent.ContentList.Add(match.Groups[MatchGroup].Value);
+            return plainContent;
         }
     }
 }

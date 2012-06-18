@@ -32,6 +32,13 @@ using SharpCover.NetCrawler.Content;
 
 namespace SharpCover.NetCrawler
 {
+    /// <summary>
+    /// This will instruct NetCrawler to extract relevant content using XPath.
+    /// When a class is decorated with this attribute, then NetCrawler will use it to extract the section
+    /// so proprties are matched against the section instead of the whole section. This would improve perforamcens
+    /// but also limit errors that would result from same xpath matching in other sections.
+    /// This attribute can be stacked with other crawler attributes (of different types) to filter content in stages.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = true, Inherited = true)]
     public class CrawlWithXPathAttribute : CrawlBaseAttribute
     {
@@ -42,8 +49,11 @@ namespace SharpCover.NetCrawler
             XPath = xpath;
         }
 
-        public override IContentSource Crawl(IContentSource content)
+        internal override IContentSource Crawl(IContentSource content, bool asList)
         {
+            if (content == null)
+                return GetDefault(string.Format("Null content"));
+
             if (content.GetType() != typeof(XmlContent) && content.GetType() != typeof(XHtmlContent)) {
                 // convert to XHTML
                 var strContent = content.ToString();
@@ -51,12 +61,17 @@ namespace SharpCover.NetCrawler
                 content.LoadRaw(strContent);
             }
 
-            if (content.GetType() == typeof(XHtmlContent))
-                return (content as XHtmlContent).Crawl(XPath);
+            if (content.GetType() == typeof(XHtmlContent)) {
+                content = asList ? (content as XHtmlContent).CrawlList(XPath) : (content as XHtmlContent).Crawl(XPath);
+            } else { //if (content.GetType() == typeof(XmlContent)) // last case
+                content = asList ? (content as XmlContent).CrawlList(XPath) : (content as XmlContent).Crawl(XPath);
+            }
 
-            //if (content.GetType() == typeof(XmlContent)) // last case
-            return (content as XmlContent).Crawl(XPath);
+            if (content == null)
+                return GetDefault(string.Format("Null content"));
 
+            return content;
         }
+
     }
 }

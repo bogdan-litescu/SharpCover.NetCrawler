@@ -34,6 +34,32 @@ namespace SharpCover.NetCrawler
 {
     public abstract class CrawlBaseAttribute : Attribute
     {
-        public abstract IContentSource Crawl(IContentSource content);
+        /// <summary>
+        /// If specified, the crawler will return this value when it can't match content.
+        /// If this is specified, ThrowIfNotFound is ignored
+        /// </summary>
+        public string DefaultValue { get; set; }
+
+        /// <summary>
+        /// If content is not matched and there is no DefaultValue, use this attribute 
+        /// to control either the system should throw an exception or just leave the fields null
+        /// </summary>
+        public bool ThrowIfNotFound { get; set; }
+
+        protected IContentSource GetDefault(string errMessage=null)
+        {
+            if (DefaultValue != null) {
+                var content = new PlainContent();
+                content.ContentList.Add(DefaultValue);
+                return content;
+            }
+
+            if (ThrowIfNotFound)
+                throw new ArgumentException(errMessage);
+
+            return null;
+        }
+
+        internal abstract IContentSource Crawl(IContentSource content, bool asList);
     }
 }

@@ -92,10 +92,10 @@ namespace SharpCover.NetCrawler.Tests
         [CrawlWithXPath("//*[@id='productInfo']")]
         class TestAppStoreProduct
         {
-            [CrawlWithXPath("//h1/text()")]
+            [CrawlWithXPath("./div[@class='title']/h1/text()")]
             public string Title { get; set; }
 
-            [CrawlWithXPath("//*[@class='description']/text()")]
+            [CrawlWithXPath("./div[@class='description']/text()")]
             public string Description { get; set; }
 
             [CrawlWithRegex("class\\s*=\\s*['\"]gallery['\"].+?src\\s*=\\s*['\"]([^\"]+)", MatchGroup=1)]
@@ -103,14 +103,15 @@ namespace SharpCover.NetCrawler.Tests
         }
 
         /// <summary>
-        ///A test for Class1 Constructor
+        /// Load 3 string fields from an app store product page.
+        /// 2 fields are parsed with XPath, 1 with Regex
         ///</summary>
         [TestMethod()]
-        [DeploymentItem("SharpCover.NetCrawler.Tests/TestData/QuickTime 7 Pro for Windows - Apple Store.html")]
-        public void CrawlerTest()
+        [DeploymentItem("SharpCover.NetCrawler.Tests/TestData/product-info.html")]
+        public void TestCrawSimpleStructure()
         {
             var content = new XHtmlContent();
-            content.LoadFromFile("QuickTime 7 Pro for Windows - Apple Store.html");
+            content.LoadFromFile("product-info.html");
 
             var crawler = new NetCrawler(content);
             var quickTimeProduct = crawler.Crawl<TestAppStoreProduct>();
@@ -118,6 +119,39 @@ namespace SharpCover.NetCrawler.Tests
             Assert.AreEqual("QuickTime 7 Pro for Windows", quickTimeProduct.Title);
             Assert.IsTrue(!string.IsNullOrEmpty(quickTimeProduct.Description));
             Assert.IsTrue(quickTimeProduct.IconUrl.IndexOf("http://store.storeimages.cdn-apple.com/6270") == 0);
+        }
+
+
+        [CrawlWithXPath("ul/li")]
+        [CrawlWithXPath("//*[@id='product-page-0']")]
+        class TestAppStoreProductSummary
+        {
+            [CrawlWithXPath("./dl/dt[@class='name']/a/text()")]
+            public string Title { get; set; }
+
+            [CrawlWithXPath("./dl/dd[@class='price']/span/text()")]
+            public string Price { get; set; }
+
+            [CrawlWithXPath("./dl/dd[@class='image']/a/img/@src")]
+            public string IconUrl { get; set; }
+        }
+
+        /// <summary>
+        /// Load a list of products from a listing
+        ///</summary>
+        [TestMethod()]
+        [DeploymentItem("SharpCover.NetCrawler.Tests/TestData/product-list.html")]
+        public void TestCrawlList()
+        {
+            var content = new XHtmlContent();
+            content.LoadFromFile("product-list.html");
+
+            var crawler = new NetCrawler(content);
+            var productList = crawler.CrawlList<TestAppStoreProductSummary>();
+
+            Assert.AreEqual(15, productList.Count);
+            //Assert.IsTrue(!string.IsNullOrEmpty(quickTimeProduct.Description));
+            //Assert.IsTrue(quickTimeProduct.IconUrl.IndexOf("http://store.storeimages.cdn-apple.com/6270") == 0);
         }
     }
 

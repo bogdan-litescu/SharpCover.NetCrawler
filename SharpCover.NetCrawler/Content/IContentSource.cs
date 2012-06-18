@@ -33,8 +33,36 @@ namespace SharpCover.NetCrawler.Content
 {
     public interface IContentSource
     {
+        /// <summary>
+        /// Returns the number of loaded/matched items in the content source
+        /// </summary>
+        /// <returns></returns>
+        int Count { get; }
+
+        /// <summary>
+        /// Clear all content from this source.
+        /// </summary>
+        void Clear();
+
+        /// <summary>
+        /// Appends new content source from file
+        /// </summary>
+        /// <param name="filePath"></param>
         void LoadFromFile(string filePath);
+
+        /// <summary>
+        /// Appends new content source from URL
+        /// </summary>
+        /// <param name="url"></param>
         void LoadFromUrl(Uri url);
+
+        /// <summary>
+        /// Appends new content source from raw string
+        /// </summary>
+        /// <param name="rawContent"></param>
         void LoadRaw(string rawContent);
+
+        string ToString();
+        IList<string> ToStringList();
     }
 }

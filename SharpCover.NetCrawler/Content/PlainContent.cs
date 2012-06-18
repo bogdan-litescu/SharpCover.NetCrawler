@@ -29,31 +29,53 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using SharpCover.NetCrawler.Utils;
 
 namespace SharpCover.NetCrawler.Content
 {
     public class PlainContent : IContentSource
     {
-        public string Content { get; set; }
+        public IList<string> ContentList { get; set; }
+        public int Count { get { return ContentList.Count; } }
+        public string Content { 
+            get { return ContentList == null || ContentList.Count == 0 ? null : ContentList[0]; }
+            // set { ContentList.Clear(); ContentList.Add(value); }
+        }
+
+        public PlainContent()
+        {
+            ContentList = new List<string>();
+        }
+
+        public void Clear()
+        {
+            ContentList.Clear();
+        }
 
         public void LoadFromFile(string filePath)
         {
-            Content = File.ReadAllText(filePath);
+            ContentList.Add(File.ReadAllText(filePath));
         }
 
         public void LoadFromUrl(Uri url)
         {
-            throw new NotImplementedException();
+            LoadRaw(UrlDownloader.Download(url));
         }
 
         public void LoadRaw(string rawContent)
         {
-            Content = rawContent;
+            ContentList.Add(rawContent);
         }
 
         public override string ToString()
         {
             return Content;
         }
+
+        public IList<string> ToStringList()
+        {
+            return ContentList;
+        }
+
     }
 }

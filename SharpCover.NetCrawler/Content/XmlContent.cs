@@ -33,6 +33,13 @@ namespace SharpCover.NetCrawler.Content
 {
     public class XmlContent : IContentSource
     {
+        public int Count { get { throw new NotImplementedException(); } }
+
+        public void Clear()
+        {
+            throw new NotImplementedException();
+        }
+
         public void LoadFromFile(string filePath)
         {
             throw new NotImplementedException();
@@ -49,6 +56,21 @@ namespace SharpCover.NetCrawler.Content
         }
 
         internal IContentSource Crawl(string XPath)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal IContentSource CrawlList(string XPath)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override string ToString()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IList<string> ToStringList()
         {
             throw new NotImplementedException();
         }

@@ -29,40 +29,81 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using HtmlAgilityPack;
+using SharpCover.NetCrawler.Utils;
 
 namespace SharpCover.NetCrawler.Content
 {
     public class XHtmlContent : IContentSource
     {
-        HtmlNode Html { get; set; }
+        public IList<HtmlNode> HtmlNodes { get; set; }
+        public int Count { get { return HtmlNodes.Count; } }
+
+        public XHtmlContent()
+        {
+            HtmlNodes = new List<HtmlNode>();
+        }
+
+        public void Clear()
+        {
+            HtmlNodes.Clear();
+        }
 
         public void LoadFromFile(string filePath)
         {
             var doc = new HtmlDocument();
             doc.Load(filePath);
-            Html = doc.DocumentNode;
+            HtmlNodes.Add(doc.DocumentNode);
         }
 
         public void LoadFromUrl(Uri url)
         {
-            throw new NotImplementedException();
+            LoadRaw(UrlDownloader.Download(url));
         }
 
         public void LoadRaw(string rawContent)
         {
             var doc = new HtmlDocument();
             doc.LoadHtml(rawContent);
-            Html = doc.DocumentNode;
+            HtmlNodes.Add(doc.DocumentNode);
+        }
+
+        public IContentSource Crawl(string xpath)
+        {
+            var content = new XHtmlContent();
+            foreach (var node in HtmlNodes) {
+                var selNode = node.SelectSingleNode(xpath);
+                if (selNode != null)
+                    content.HtmlNodes.Add(selNode);
+            }
+
+            return content;
+        }
+
+        public IContentSource CrawlList(string xpath)
+        {
+            var content = new XHtmlContent();
+            foreach (var node in HtmlNodes) {
+                var selNodes = node.SelectNodes(xpath);
+                if (selNodes != null) {
+                    foreach (var selNode in selNodes)
+                        content.HtmlNodes.Add(selNode);
+                }
+            }
+
+            return content;
         }
 
         public override string ToString()
         {
-            return Html == null ? "" : Html.OuterHtml;
+            return HtmlNodes == null || HtmlNodes.Count == 0 ? "" : HtmlNodes[0].OuterHtml;
         }
 
-        public IContentSource Crawl(string XPath)
+        public IList<string> ToStringList()
         {
-            return new XHtmlContent() { Html = Html.SelectSingleNode(XPath) };
+            if (HtmlNodes == null || HtmlNodes.Count == 0)
+                return new List<string>();
+
+            return HtmlNodes.Select(x=>x.OuterHtml).ToList();
         }
     }
 }

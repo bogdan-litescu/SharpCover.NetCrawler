@@ -49,37 +49,57 @@ namespace SharpCover.NetCrawler
         public T Crawl<T>()
             where T : class
         {
+            var list = Crawl<T>(false);
+            return list == null || list.Count == 0 ? null : list[0];
+        }
+
+        public IList<T> CrawlList<T>()
+            where T : class
+        {
+            return Crawl<T>(true);
+        }
+
+        IList<T> Crawl<T>(bool asList)
+            where T : class
+        {
             // get type and create new instance
             Type type = typeof(T);
-            var obj = Activator.CreateInstance<T>();
 
             // select base content by applying crawlers one after another
             var content = Content;
-            foreach (Attribute attr in type.GetCustomAttributes(true)) {
-                var crawlSection = attr as CrawlBaseAttribute;
-                if (null != crawlSection) {
-                    content = crawlSection.Crawl(content);
-                }
+            var attrs = type.GetCustomAttributes(true);
+            for (int i = 0; i < attrs.Length; i++) {
+                var crawlSection = attrs[i] as CrawlBaseAttribute;
+                if (null != crawlSection)
+                    content = crawlSection.Crawl(content, asList);
             }
+
+            // we now know how many objects we need
+            List<T> objs = new List<T>();
+            for (int i = 0; i < content.Count; i++)
+                objs.Add(Activator.CreateInstance<T>());
 
             // ready to crawl properties
             foreach (var prop in type.GetProperties()) {
                 var valueContent = content;
                 bool atLeastOne = false;
-                foreach (Attribute attr in prop.GetCustomAttributes(true)) {
-                    var crawlField = attr as CrawlBaseAttribute;
+                var propAttrs = prop.GetCustomAttributes(true);
+                for (int i = 0; i < propAttrs.Length; i++) {
+                    var crawlField = propAttrs[i] as CrawlBaseAttribute;
                     if (null != crawlField) {
                         atLeastOne = true;
-                        valueContent = crawlField.Crawl(valueContent);
+                        valueContent = crawlField.Crawl(valueContent, asList);
                     }
                 }
 
                 if (atLeastOne) {
-                    prop.SetValue(obj, valueContent.ToString(), null);
+                    var values = valueContent.ToStringList();
+                    for (int i = 0; i < values.Count; i++)
+                        prop.SetValue(objs[i], values[i], null);
                 }
             }
 
-            return obj;
+            return objs;
         }
     }
 }
