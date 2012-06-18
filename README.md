@@ -2,7 +2,8 @@ SharpCover.NetCrawler
 =====================
 
 Currently under development!
-Released under dual license, Affero GPL and Comercial License.
+
+Released under dual license, Affero GPL and Comercial License. Contact us for pricing, customizations, support.
 
 **Usage example:**
 
@@ -11,10 +12,10 @@ Released under dual license, Affero GPL and Comercial License.
     [CrawlWithXPath("//*[@id='productInfo']")]
     class TestAppStoreProduct
     {
-        [CrawlWithXPath("//h1/text()")]
+        [CrawlWithXPath("./div[@class='title']/h1/text()")]
         public string Title { get; set; }
 
-        [CrawlWithXPath("//*[@class='description']/text()")]
+        [CrawlWithXPath("./div[@class='description']/text()")]
         public string Description { get; set; }
 
         [CrawlWithRegex("class\\s*=\\s*['\"]gallery['\"].+?src\\s*=\\s*['\"]([^\"]+)", MatchGroup=1)]
@@ -24,7 +25,7 @@ Released under dual license, Affero GPL and Comercial License.
   Loading XHTML document and parsing data into the model:
   
       var content = new XHtmlContent();
-      content.LoadFromFile("QuickTime 7 Pro for Windows - Apple Store.html");
+      content.LoadFromFile("product-info.html");
 
       var crawler = new NetCrawler(content);
       var quickTimeProduct = crawler.Crawl<TestAppStoreProduct>();
@@ -37,9 +38,9 @@ Features:
 - XPath crawler that works with XHTML (with Agility Pack) and XML
 - Regex crawler
 - Default Value if content is not matched or optionally throw exception
+- Parse List of objects (for example a products list)
 
 TODO:
-- parse list
 - custom type crawler
 - StripHtml crawler
 - Regex.Replace crawler
